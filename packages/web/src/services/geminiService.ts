@@ -108,7 +108,7 @@ export async function getRandomWord(): Promise<string> {
         thinkingConfig: { thinkingBudget: 0 },
       },
     });
-    return response.text.trim();
+    return (response.text ?? '').trim();
   } catch (error) {
     console.error('Error getting random word from Gemini:', error);
     const errorMessage =
@@ -164,7 +164,7 @@ Return ONLY the raw JSON object, no additional text. The response must start wit
         config: config,
       });
 
-      let jsonStr = response.text.trim();
+      let jsonStr = (response.text ?? '').trim();
 
       // Debug logging
       console.log(`Attempt ${attempt}/${maxRetries} - Raw API response:`, jsonStr);
@@ -240,7 +240,7 @@ export async function getWikiMetadata(topic: string, language: string = 'English
       },
     });
 
-    const text = response.text.trim();
+    const text = (response.text ?? '').trim();
     // Clean up potential markdown fences
     const jsonStr = text.replace(/^```json\s*|\s*```$/g, '');
     return JSON.parse(jsonStr) as WikiMetadata;
