@@ -11,7 +11,7 @@ import SearchBar from '../components/SearchBar';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import AsciiArtDisplay from '../components/AsciiArtDisplay';
 import WikiChat from '../components/WikiChat';
-import PdfExport from '../components/PdfExport';
+import ExportMenu from '../components/ExportMenu';
 import BookmarkButton from '../components/BookmarkButton';
 import { useHistory } from '../contexts/HistoryContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -204,10 +204,10 @@ const WikiPage: React.FC = () => {
             </div>
           )}
 
-          {/* PDF Export + Bookmark Buttons */}
+          {/* Export Menu + Bookmark Buttons */}
           {!isLoading && !error && content.length > 0 && (
             <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
-              <PdfExport
+              <ExportMenu
                 topic={topic}
                 content={content}
                 metadata={metadata}
