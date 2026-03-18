@@ -14,9 +14,11 @@ import { useConfig } from '../contexts/ConfigContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useHistory } from '../contexts/HistoryContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useProviderSync } from '../hooks/useProviderSync';
 import { UNIQUE_WORDS } from './home';
 
 const RootLayoutInner: React.FC = () => {
+  useProviderSync();
   const navigate = useNavigate();
   const { toggleTheme } = useTheme();
   const { history: historyItems } = useHistory();

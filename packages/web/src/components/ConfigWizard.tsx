@@ -23,12 +23,12 @@ interface ProviderCardInfo {
 
 const PROVIDER_CARDS: ProviderCardInfo[] = [
   {
-    id: 'ollama',
-    name: 'Ollama (Local)',
-    description: 'Run AI models locally on your machine',
-    freeTier: 'Completely free — runs on your hardware',
+    id: 'openrouter',
+    name: 'OpenRouter',
+    description: 'Access 100+ AI models through one API key',
+    freeTier: 'Many free models available — get a key at openrouter.ai',
     recommended: true,
-    requiresKey: false,
+    requiresKey: true,
   },
   {
     id: 'gemini',
@@ -37,6 +37,14 @@ const PROVIDER_CARDS: ProviderCardInfo[] = [
     freeTier: 'Free tier available with generous limits',
     recommended: false,
     requiresKey: true,
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama (Local)',
+    description: 'Run AI models locally on your machine',
+    freeTier: 'Completely free — runs on your hardware',
+    recommended: false,
+    requiresKey: false,
   },
   {
     id: 'openai',
@@ -51,14 +59,6 @@ const PROVIDER_CARDS: ProviderCardInfo[] = [
     name: 'Anthropic Claude',
     description: 'Anthropic Claude AI models',
     freeTier: 'Pay-as-you-go pricing',
-    recommended: false,
-    requiresKey: true,
-  },
-  {
-    id: 'openrouter',
-    name: 'OpenRouter',
-    description: 'OpenRouter multi-model gateway',
-    freeTier: 'Some free models available',
     recommended: false,
     requiresKey: true,
   },
@@ -96,7 +96,7 @@ const ConfigWizard: React.FC = () => {
   const { isConfigured, setProvider, setApiKey, setLanguage, setTheme, markConfigured } = useConfig();
 
   const [step, setStep] = useState<WizardStep>('welcome');
-  const [selectedProviderId, setSelectedProviderId] = useState<string>('');
+  const [selectedProviderId, setSelectedProviderId] = useState<string>('openrouter');
   const [apiKey, setApiKeyValue] = useState('');
   const [keyValid, setKeyValid] = useState<boolean | null>(null);
   const [keyValidating, setKeyValidating] = useState(false);

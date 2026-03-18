@@ -137,18 +137,19 @@ describe('ConfigWizard', () => {
     expect(screen.getByTestId('provider-card-openrouter')).toBeInTheDocument();
   });
 
-  it('shows "Recommended" badge on Ollama', () => {
+  it('shows "Recommended" badge on OpenRouter', () => {
     renderWizard();
     fireEvent.click(screen.getByTestId('wizard-next'));
-    const ollamaCard = screen.getByTestId('provider-card-ollama');
-    expect(ollamaCard).toHaveTextContent('Recommended');
+    const openrouterCard = screen.getByTestId('provider-card-openrouter');
+    expect(openrouterCard).toHaveTextContent('Recommended');
   });
 
-  it('cannot proceed from provider step without selecting a provider', () => {
+  it('has OpenRouter pre-selected by default', () => {
     renderWizard();
     fireEvent.click(screen.getByTestId('wizard-next')); // go to provider step
     const nextBtn = screen.getByTestId('wizard-next');
-    expect(nextBtn).toBeDisabled();
+    // OpenRouter is pre-selected, so Next should be enabled
+    expect(nextBtn).not.toBeDisabled();
   });
 
   it('skips API key step when Ollama is selected', () => {

@@ -1,18 +1,29 @@
 /**
- * Bridge module — wraps the provider system as standalone functions
- * matching the old geminiService API for backward compatibility.
- *
- * After Task 22 wires ConfigContext, these functions will read the
- * active provider from context. For now they default to GeminiProvider.
+ * Bridge module — wraps the provider system as standalone functions.
+ * Uses setActiveProvider() to receive the configured provider from React.
  */
 
+import type { AIProvider } from './providers/types';
 import { GeminiProvider } from './providers/gemini';
 
 export type { WikiMetadata, AsciiArtData, ChatMessage } from './providers/types';
 
-function getProvider(): GeminiProvider {
-  const key = import.meta.env.VITE_GEMINI_API_KEY ?? '';
-  return new GeminiProvider(key);
+let activeProvider: AIProvider | null = null;
+
+/**
+ * Set the active provider instance. Called by useProviderSync() in root layout
+ * whenever the config changes.
+ */
+export function setActiveProvider(provider: AIProvider): void {
+  activeProvider = provider;
+}
+
+function getProvider(): AIProvider {
+  if (activeProvider) return activeProvider;
+  // Fallback for dev: use env var if no provider configured yet
+  const key = import.meta.env.VITE_GEMINI_API_KEY ?? import.meta.env.VITE_AI_KEY ?? '';
+  if (key) return new GeminiProvider(key);
+  throw new Error('API key is missing. Please provide a valid API key.');
 }
 
 export async function* streamDefinition(
