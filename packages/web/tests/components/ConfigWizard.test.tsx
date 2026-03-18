@@ -80,7 +80,7 @@ function ConfigReader({ onConfig }: { onConfig: (cfg: ReturnType<typeof useConfi
   const ctx = useConfig();
   React.useEffect(() => {
     onConfig(ctx);
-  });
+  }, [ctx, onConfig]);
   return null;
 }
 

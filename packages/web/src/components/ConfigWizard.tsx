@@ -505,7 +505,7 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   successText: {
-    color: '#22c55e',
+    color: 'var(--accent-color)',
     fontSize: '0.85em',
   },
   errorText: {
