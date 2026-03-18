@@ -89,35 +89,6 @@ export async function* streamDefinition(
 }
 
 /**
- * Generates a single random word or concept using the Gemini API.
- * @returns A promise that resolves to a single random word.
- */
-export async function getRandomWord(): Promise<string> {
-  if (!import.meta.env.VITE_GEMINI_API_KEY) {
-    throw new Error('VITE_GEMINI_API_KEY is not configured.');
-  }
-
-  const prompt = `Generate a single, random, interesting English word or a two-word concept. It can be a noun, verb, adjective, or a proper noun. Respond with only the word or concept itself, with no extra text, punctuation, or formatting.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: textModelName,
-      contents: prompt,
-      config: {
-        // Disable thinking for low latency.
-        thinkingConfig: { thinkingBudget: 0 },
-      },
-    });
-    return (response.text ?? '').trim();
-  } catch (error) {
-    console.error('Error getting random word from Gemini:', error);
-    const errorMessage =
-      error instanceof Error ? error.message : 'An unknown error occurred.';
-    throw new Error(`Could not get random word: ${errorMessage}`);
-  }
-}
-
-/**
  * Generates ASCII art and optionally text for a given topic.
  * @param topic The topic to generate art for.
  * @returns A promise that resolves to an object with art and optional text.

@@ -142,8 +142,7 @@ const AppContent: React.FC = () => {
     return () => {
       isCancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTopic]);
+  }, [currentTopic, language]);
 
   const handleWordClick = useCallback((word: string) => {
     const newTopic = word.trim();
