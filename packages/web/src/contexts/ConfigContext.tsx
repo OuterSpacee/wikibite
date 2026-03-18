@@ -55,9 +55,26 @@ const ConfigContext = createContext<ConfigContextValue | undefined>(undefined);
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<AppConfig>(loadConfig);
 
-  // Persist every time config changes
+  // Persist every time config changes + broadcast to other tabs
+  const channelRef = React.useRef<BroadcastChannel | null>(null);
+
+  useEffect(() => {
+    const channel = new BroadcastChannel('wiki-bite-config');
+    channelRef.current = channel;
+
+    channel.onmessage = (event: MessageEvent<AppConfig>) => {
+      setConfig(event.data);
+    };
+
+    return () => {
+      channel.close();
+      channelRef.current = null;
+    };
+  }, []);
+
   useEffect(() => {
     saveConfig(config);
+    channelRef.current?.postMessage(config);
   }, [config]);
 
   const setProvider = useCallback((providerId: string, model?: string) => {
