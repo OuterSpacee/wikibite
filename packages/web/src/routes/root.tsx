@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { Outlet, useNavigate } from 'react-router';
+import { Outlet, useNavigate, useLocation } from 'react-router';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageSelector from '../components/LanguageSelector';
 import HistorySidebar from '../components/HistorySidebar';
@@ -20,6 +20,7 @@ import { UNIQUE_WORDS } from './home';
 const RootLayoutInner: React.FC = () => {
   useProviderSync();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toggleTheme } = useTheme();
   const { history: historyItems } = useHistory();
   const { config } = useConfig();
@@ -91,12 +92,39 @@ const RootLayoutInner: React.FC = () => {
   return (
       <div>
         <ConfigWizard />
-        <nav aria-label="History sidebar">
+        <aside aria-label="History sidebar">
           <HistorySidebar onSelectTopic={handleSelectTopic} />
-        </nav>
+        </aside>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <LanguageSelector />
-          <ThemeToggle />
+          <nav aria-label="Main navigation" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {[
+              { path: '/', label: 'Home' },
+              { path: '/bookmarks', label: 'Bookmarks' },
+              { path: '/graph', label: 'Graph' },
+              { path: '/settings', label: 'Settings' },
+            ].map((link) => (
+              <button
+                key={link.path}
+                onClick={() => navigate(link.path)}
+                style={{
+                  padding: '0.35rem 0.7rem',
+                  border: 'none',
+                  borderRadius: '4px',
+                  backgroundColor: location.pathname === link.path ? 'var(--accent-color)' : 'transparent',
+                  color: location.pathname === link.path ? '#fff' : 'var(--text-color)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontFamily: 'inherit',
+                }}
+              >
+                {link.label}
+              </button>
+            ))}
+          </nav>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
         </header>
 
         <main>
