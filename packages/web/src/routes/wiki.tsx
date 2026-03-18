@@ -12,6 +12,7 @@ import LoadingSkeleton from '../components/LoadingSkeleton';
 import AsciiArtDisplay from '../components/AsciiArtDisplay';
 import WikiChat from '../components/WikiChat';
 import PdfExport from '../components/PdfExport';
+import BookmarkButton from '../components/BookmarkButton';
 import { useHistory } from '../contexts/HistoryContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { UNIQUE_WORDS } from './home';
@@ -203,15 +204,21 @@ const WikiPage: React.FC = () => {
             </div>
           )}
 
-          {/* PDF Export Button */}
+          {/* PDF Export + Bookmark Buttons */}
           {!isLoading && !error && content.length > 0 && (
-            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
               <PdfExport
                 topic={topic}
                 content={content}
                 metadata={metadata}
                 asciiArt={asciiArt}
                 language={effectiveLanguageName}
+              />
+              <BookmarkButton
+                topic={topic}
+                language={effectiveLanguageName}
+                provider=""
+                model=""
               />
             </div>
           )}

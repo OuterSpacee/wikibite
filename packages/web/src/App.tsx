@@ -14,6 +14,7 @@ import SettingsPage from './routes/settings';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { HistoryProvider } from './contexts/HistoryContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { BookmarkProvider } from './contexts/BookmarkContext';
 
 const router = createBrowserRouter([
   {
@@ -34,7 +35,9 @@ const App: React.FC = () => {
     <ThemeProvider>
       <LanguageProvider>
         <HistoryProvider>
-          <RouterProvider router={router} />
+          <BookmarkProvider>
+            <RouterProvider router={router} />
+          </BookmarkProvider>
         </HistoryProvider>
       </LanguageProvider>
     </ThemeProvider>
