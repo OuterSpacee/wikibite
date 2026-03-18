@@ -90,8 +90,10 @@ function createRegistry(): ProviderRegistry {
   return registry;
 }
 
+const DEVICE_PASSPHRASE = 'wiki-bite-local-encryption-key';
+
 const ConfigWizard: React.FC = () => {
-  const { isConfigured, setProvider, setLanguage, setTheme, markConfigured } = useConfig();
+  const { isConfigured, setProvider, setApiKey, setLanguage, setTheme, markConfigured } = useConfig();
 
   const [step, setStep] = useState<WizardStep>('welcome');
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
@@ -164,12 +166,15 @@ const ConfigWizard: React.FC = () => {
     }
   }, [apiKey, selectedProviderId, registry]);
 
-  const handleFinish = useCallback(() => {
+  const handleFinish = useCallback(async () => {
     setProvider(selectedProviderId);
     setLanguage(selectedLanguage);
     setTheme(selectedTheme);
+    if (apiKey) {
+      await setApiKey(apiKey, DEVICE_PASSPHRASE);
+    }
     markConfigured();
-  }, [selectedProviderId, selectedLanguage, selectedTheme, setProvider, setLanguage, setTheme, markConfigured]);
+  }, [selectedProviderId, selectedLanguage, selectedTheme, apiKey, setProvider, setApiKey, setLanguage, setTheme, markConfigured]);
 
   if (isConfigured) {
     return null;

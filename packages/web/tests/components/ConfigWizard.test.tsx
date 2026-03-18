@@ -290,6 +290,7 @@ describe('ConfigWizard', () => {
     await waitFor(() => {
       expect(latestConfig!.isConfigured).toBe(true);
       expect(latestConfig!.config.providerId).toBe('openai');
+      expect(latestConfig!.config.encryptedApiKey).toBeTruthy();
     });
   });
 
