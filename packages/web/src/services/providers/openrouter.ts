@@ -22,6 +22,8 @@ export class OpenRouterProvider implements AIProvider {
     return {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${key ?? this.apiKey}`,
+      'HTTP-Referer': window.location.origin,
+      'X-Title': 'Wiki Bite',
     };
   }
 
@@ -208,14 +210,12 @@ Return ONLY the raw JSON object, no additional text. The response must start wit
 
   async validateKey(key: string): Promise<boolean> {
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: this.getHeaders(key),
-        body: JSON.stringify({
-          model: this.defaultModel,
-          messages: [{ role: 'user', content: 'Hello' }],
-          max_tokens: 1,
-        }),
+      // Use OpenRouter's auth endpoint — no model call needed
+      const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${key}`,
+        },
       });
       return response.ok;
     } catch {
