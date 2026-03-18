@@ -90,13 +90,39 @@ const RootLayoutInner: React.FC = () => {
   );
 
   return (
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <ConfigWizard />
-        <aside aria-label="History sidebar">
-          <HistorySidebar onSelectTopic={handleSelectTopic} />
-        </aside>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <nav aria-label="Main navigation" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+
+        {/* Top navigation bar */}
+        <header style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          backgroundColor: 'var(--bg-color)',
+          borderBottom: '1px solid var(--border-color)',
+          padding: '0.5rem 1rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.1rem',
+              fontWeight: 700,
+              fontFamily: 'inherit',
+              color: 'var(--text-color)',
+              letterSpacing: '0.05em',
+              padding: 0,
+            }}
+          >
+            WIKI BITE
+          </button>
+
+          <nav aria-label="Main navigation" style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
             {[
               { path: '/', label: 'Home' },
               { path: '/bookmarks', label: 'Bookmarks' },
@@ -107,27 +133,34 @@ const RootLayoutInner: React.FC = () => {
                 key={link.path}
                 onClick={() => navigate(link.path)}
                 style={{
-                  padding: '0.35rem 0.7rem',
+                  padding: '0.4rem 0.75rem',
                   border: 'none',
                   borderRadius: '4px',
                   backgroundColor: location.pathname === link.path ? 'var(--accent-color)' : 'transparent',
-                  color: location.pathname === link.path ? '#fff' : 'var(--text-color)',
+                  color: location.pathname === link.path ? '#fff' : 'var(--secondary-text-color)',
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: '0.8rem',
                   fontFamily: 'inherit',
+                  fontWeight: location.pathname === link.path ? 600 : 400,
+                  transition: 'all 0.15s ease',
                 }}
               >
                 {link.label}
               </button>
             ))}
           </nav>
+
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <LanguageSelector />
             <ThemeToggle />
           </div>
         </header>
 
-        <main>
+        <aside aria-label="History sidebar">
+          <HistorySidebar onSelectTopic={handleSelectTopic} />
+        </aside>
+
+        <main style={{ flex: 1 }}>
           <Outlet />
         </main>
 
