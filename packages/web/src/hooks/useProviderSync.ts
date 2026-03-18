@@ -53,6 +53,8 @@ export function useProviderSync(): void {
 
     decryptKey(config.encryptedApiKey, DEVICE_PASSPHRASE)
       .then((rawKey) => {
+        // Store in sessionStorage so ai.ts can create provider synchronously on refresh
+        sessionStorage.setItem('wiki-bite-raw-key', rawKey);
         const provider = createProvider(config.providerId, rawKey);
         setActiveProvider(provider);
       })

@@ -5,11 +5,12 @@ export class OpenRouterProvider implements AIProvider {
   readonly name = 'OpenRouter';
   readonly description = 'OpenRouter multi-model gateway';
   readonly requiresKey = true;
-  readonly defaultModel = 'meta-llama/llama-3.1-8b-instruct:free';
+  readonly defaultModel = 'meta-llama/llama-3.2-3b-instruct:free';
   readonly availableModels = [
-    'meta-llama/llama-3.1-8b-instruct:free',
-    'google/gemini-2.5-flash',
-    'anthropic/claude-sonnet-4',
+    'meta-llama/llama-3.2-3b-instruct:free',
+    'google/gemma-2-9b-it:free',
+    'qwen/qwen-2.5-7b-instruct:free',
+    'mistralai/mistral-7b-instruct:free',
   ];
 
   private apiKey: string;

@@ -5,6 +5,10 @@
 
 import type { AIProvider } from './providers/types';
 import { GeminiProvider } from './providers/gemini';
+import { OpenAIProvider } from './providers/openai';
+import { ClaudeProvider } from './providers/claude';
+import { OllamaProvider } from './providers/ollama';
+import { OpenRouterProvider } from './providers/openrouter';
 
 export type { WikiMetadata, AsciiArtData, ChatMessage } from './providers/types';
 
@@ -18,12 +22,42 @@ export function setActiveProvider(provider: AIProvider): void {
   activeProvider = provider;
 }
 
+function createProviderById(providerId: string, apiKey: string): AIProvider {
+  switch (providerId) {
+    case 'openai': return new OpenAIProvider(apiKey);
+    case 'claude': return new ClaudeProvider(apiKey);
+    case 'ollama': return new OllamaProvider();
+    case 'openrouter': return new OpenRouterProvider(apiKey);
+    case 'gemini':
+    default:
+      return new GeminiProvider(apiKey);
+  }
+}
+
 function getProvider(): AIProvider {
   if (activeProvider) return activeProvider;
-  // Fallback for dev: use env var if no provider configured yet
+
+  // Synchronous fallback: read from sessionStorage + localStorage
+  // This handles the window before useProviderSync finishes async decryption
+  try {
+    const rawKey = sessionStorage.getItem('wiki-bite-raw-key') ?? '';
+    const configStr = localStorage.getItem('wiki-bite-config');
+    if (configStr && rawKey) {
+      const config = JSON.parse(configStr);
+      if (config.isConfigured && config.providerId) {
+        const provider = createProviderById(config.providerId, rawKey);
+        activeProvider = provider;
+        return provider;
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
+
+  // Last resort: env var fallback for local dev
   const key = import.meta.env.VITE_GEMINI_API_KEY ?? import.meta.env.VITE_AI_KEY ?? '';
   if (key) return new GeminiProvider(key);
-  throw new Error('API key is missing. Please provide a valid API key.');
+  throw new Error('API key is missing. Please configure a provider in Settings.');
 }
 
 export async function* streamDefinition(
