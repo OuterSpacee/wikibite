@@ -1,4 +1,4 @@
-import { WikiMetadata, AsciiArtData } from '../services/geminiService';
+import type { WikiMetadata, AsciiArtData } from '../services/providers/types';
 
 /**
  * Exports wiki content as a Markdown string.

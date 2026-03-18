@@ -1,5 +1,5 @@
 import React from 'react';
-import { WikiMetadata } from '../services/geminiService';
+import type { WikiMetadata } from '../services/providers/types';
 
 interface ContentDisplayProps {
   content: string;

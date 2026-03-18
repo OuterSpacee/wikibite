@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import jsPDF from 'jspdf';
-import { WikiMetadata, AsciiArtData } from '../services/geminiService';
+import type { WikiMetadata, AsciiArtData } from '../services/providers/types';
 import { exportAsMarkdown, exportAsJson, exportAsText, downloadFile } from '../lib/export';
 
 interface ExportMenuProps {

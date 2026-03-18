@@ -5,7 +5,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router';
-import { streamDefinition, generateAsciiArt, AsciiArtData, getWikiMetadata, WikiMetadata } from '../services/geminiService';
+import { streamDefinition, generateAsciiArt, getWikiMetadata } from '../services/ai';
+import type { AsciiArtData, WikiMetadata } from '../services/providers/types';
 import ContentDisplay from '../components/ContentDisplay';
 import SearchBar from '../components/SearchBar';
 import LoadingSkeleton from '../components/LoadingSkeleton';

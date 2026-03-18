@@ -1,6 +1,6 @@
 import React from 'react';
 import jsPDF from 'jspdf';
-import { WikiMetadata, AsciiArtData } from '../services/geminiService';
+import type { WikiMetadata, AsciiArtData } from '../services/providers/types';
 
 interface PdfExportProps {
     topic: string;

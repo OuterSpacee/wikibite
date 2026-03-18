@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { streamChatResponse, ChatMessage } from '../services/geminiService';
+import { streamChatResponse } from '../services/ai';
+import type { ChatMessage } from '../services/providers/types';
 
 interface WikiChatProps {
     currentTopic: string;
