@@ -50,7 +50,7 @@ const StreamingContent: React.FC<{ content: string }> = ({ content }) => (
 const ContentDisplay: React.FC<ContentDisplayProps> = ({ content, metadata, isLoading, onWordClick }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div className="definition-section">
+      <div className="definition-section" aria-live="polite" aria-atomic="false">
         {isLoading ? (
           <StreamingContent content={content} />
         ) : (

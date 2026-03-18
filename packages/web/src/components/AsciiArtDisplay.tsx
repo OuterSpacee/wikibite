@@ -18,13 +18,22 @@ const AsciiArtDisplay: React.FC<AsciiArtDisplayProps> = ({ artData, topic }) => 
     let intervalId: number;
 
     if (artData) {
+      // Conditionally construct the full text based on whether text data exists.
+      const fullText = artData.text ? `${artData.art}\n\n${artData.text}` : artData.art;
+
+      // Skip animation if user prefers reduced motion
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) {
+        setVisibleContent(fullText);
+        setIsStreaming(false);
+        return;
+      }
+
       setVisibleContent(''); // Clear the initial '*' placeholder
       setIsStreaming(true);
 
-      // Conditionally construct the full text based on whether text data exists.
-      const fullText = artData.text ? `${artData.art}\n\n${artData.text}` : artData.art;
       let currentIndex = 0;
-      
+
       intervalId = window.setInterval(() => {
         const char = fullText[currentIndex];
         if (char !== undefined) { // Check if character exists

@@ -89,13 +89,17 @@ const RootLayoutInner: React.FC = () => {
     <ConfigProvider>
       <div>
         <ConfigWizard />
-        <HistorySidebar onSelectTopic={handleSelectTopic} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <nav aria-label="History sidebar">
+          <HistorySidebar onSelectTopic={handleSelectTopic} />
+        </nav>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <LanguageSelector />
           <ThemeToggle />
-        </div>
+        </header>
 
-        <Outlet />
+        <main>
+          <Outlet />
+        </main>
 
         <CommandPalette
           isOpen={paletteOpen}
