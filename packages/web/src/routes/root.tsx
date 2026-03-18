@@ -10,7 +10,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import HistorySidebar from '../components/HistorySidebar';
 import ConfigWizard from '../components/ConfigWizard';
 import CommandPalette, { type CommandPaletteAction } from '../components/CommandPalette';
-import { ConfigProvider } from '../contexts/ConfigContext';
+import { useConfig } from '../contexts/ConfigContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useHistory } from '../contexts/HistoryContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -20,6 +20,7 @@ const RootLayoutInner: React.FC = () => {
   const navigate = useNavigate();
   const { toggleTheme } = useTheme();
   const { history: historyItems } = useHistory();
+  const { config } = useConfig();
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   const handleSelectTopic = useCallback(
@@ -86,7 +87,6 @@ const RootLayoutInner: React.FC = () => {
   );
 
   return (
-    <ConfigProvider>
       <div>
         <ConfigWizard />
         <nav aria-label="History sidebar">
@@ -111,11 +111,10 @@ const RootLayoutInner: React.FC = () => {
 
         <footer className="sticky-footer">
           <p className="footer-text" style={{ margin: 0 }}>
-            Wiki Bite by <a href="https://biteskill.com" target="_blank" rel="noopener noreferrer">BiteSkill</a> · Powered by Gemini 2.5 Flash
+            Wiki Bite by <a href="https://biteskill.com" target="_blank" rel="noopener noreferrer">BiteSkill</a> · Powered by {config.providerId}
           </p>
         </footer>
       </div>
-    </ConfigProvider>
   );
 };
 

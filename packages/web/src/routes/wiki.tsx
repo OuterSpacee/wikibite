@@ -243,6 +243,19 @@ const WikiPage: React.FC = () => {
           Generated in {Math.round(generationTime)}ms
         </div>
       )}
+
+      {!isLoading && content.length > 0 && (
+        <div style={{
+          textAlign: 'center',
+          padding: '0.75rem',
+          fontSize: '0.75rem',
+          color: 'var(--secondary-text-color)',
+          borderTop: '1px solid var(--border-color)',
+          marginTop: '1rem',
+        }}>
+          AI-generated content — may contain inaccuracies
+        </div>
+      )}
     </div>
   );
 };

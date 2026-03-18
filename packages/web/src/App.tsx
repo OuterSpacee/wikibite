@@ -15,6 +15,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { HistoryProvider } from './contexts/HistoryContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { BookmarkProvider } from './contexts/BookmarkContext';
+import { ConfigProvider } from './contexts/ConfigContext';
 
 const router = createBrowserRouter([
   {
@@ -35,9 +36,11 @@ const App: React.FC = () => {
     <ThemeProvider>
       <LanguageProvider>
         <HistoryProvider>
-          <BookmarkProvider>
-            <RouterProvider router={router} />
-          </BookmarkProvider>
+          <ConfigProvider>
+            <BookmarkProvider>
+              <RouterProvider router={router} />
+            </BookmarkProvider>
+          </ConfigProvider>
         </HistoryProvider>
       </LanguageProvider>
     </ThemeProvider>
