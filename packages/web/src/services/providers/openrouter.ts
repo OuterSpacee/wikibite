@@ -1,5 +1,12 @@
 import type { AIProvider, WikiMetadata, ChatMessage, AsciiArtData } from './types';
 
+export interface OpenRouterModel {
+  id: string;
+  name: string;
+  contextLength: number;
+  pricing: { prompt: string; completion: string };
+}
+
 export class OpenRouterProvider implements AIProvider {
   readonly id = 'openrouter';
   readonly name = 'OpenRouter';
@@ -17,6 +24,50 @@ export class OpenRouterProvider implements AIProvider {
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
+  }
+
+  /**
+   * Fetch all available models from OpenRouter and categorize as free vs paid.
+   */
+  static async fetchAvailableModels(apiKey: string): Promise<{
+    free: OpenRouterModel[];
+    paid: OpenRouterModel[];
+  }> {
+    const response = await fetch('https://openrouter.ai/api/v1/models', {
+      headers: { 'Authorization': `Bearer ${apiKey}` },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch models: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const models: OpenRouterModel[] = (data.data ?? []).map((m: any) => ({
+      id: m.id,
+      name: m.name ?? m.id,
+      contextLength: m.context_length ?? 0,
+      pricing: {
+        prompt: m.pricing?.prompt ?? '0',
+        completion: m.pricing?.completion ?? '0',
+      },
+    }));
+
+    const free: OpenRouterModel[] = [];
+    const paid: OpenRouterModel[] = [];
+
+    for (const model of models) {
+      const isFree = parseFloat(model.pricing.prompt) === 0 && parseFloat(model.pricing.completion) === 0;
+      if (isFree) {
+        free.push(model);
+      } else {
+        paid.push(model);
+      }
+    }
+
+    free.sort((a, b) => a.name.localeCompare(b.name));
+    paid.sort((a, b) => a.name.localeCompare(b.name));
+
+    return { free, paid };
   }
 
   private getHeaders(key?: string): Record<string, string> {

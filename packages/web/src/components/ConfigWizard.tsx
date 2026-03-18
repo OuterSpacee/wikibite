@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useConfig } from '@/contexts/ConfigContext';
 import type { AIProvider } from '@/services/providers/types';
 import { ProviderRegistry } from '@/services/providerRegistry';
@@ -6,11 +6,11 @@ import { GeminiProvider } from '@/services/providers/gemini';
 import { OpenAIProvider } from '@/services/providers/openai';
 import { ClaudeProvider } from '@/services/providers/claude';
 import { OllamaProvider } from '@/services/providers/ollama';
-import { OpenRouterProvider } from '@/services/providers/openrouter';
+import { OpenRouterProvider, type OpenRouterModel } from '@/services/providers/openrouter';
 
-type WizardStep = 'welcome' | 'provider' | 'apikey' | 'preferences' | 'done';
+type WizardStep = 'welcome' | 'provider' | 'apikey' | 'modelselect' | 'preferences' | 'done';
 
-const STEPS: WizardStep[] = ['welcome', 'provider', 'apikey', 'preferences', 'done'];
+const STEPS: WizardStep[] = ['welcome', 'provider', 'apikey', 'modelselect', 'preferences', 'done'];
 
 interface ProviderCardInfo {
   id: string;
@@ -104,34 +104,55 @@ const ConfigWizard: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [selectedTheme, setSelectedTheme] = useState('system');
 
+  // Model selection state (OpenRouter only)
+  const [modelTier, setModelTier] = useState<'free' | 'paid'>('free');
+  const [freeModels, setFreeModels] = useState<OpenRouterModel[]>([]);
+  const [paidModels, setPaidModels] = useState<OpenRouterModel[]>([]);
+  const [selectedModel, setSelectedModel] = useState('auto');
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState('');
+
   const [registry] = useState(() => createRegistry());
 
   const currentStepIndex = STEPS.indexOf(step);
   const selectedCard = PROVIDER_CARDS.find((c) => c.id === selectedProviderId);
 
+  const isOpenRouter = selectedProviderId === 'openrouter';
+
   const goNext = useCallback(() => {
     const idx = STEPS.indexOf(step);
     if (idx < STEPS.length - 1) {
-      // If the selected provider doesn't require a key, skip the apikey step
-      if (STEPS[idx + 1] === 'apikey' && selectedCard && !selectedCard.requiresKey) {
+      const nextStep = STEPS[idx + 1];
+      // Skip apikey + modelselect for providers that don't need a key
+      if (nextStep === 'apikey' && selectedCard && !selectedCard.requiresKey) {
+        setStep('preferences');
+      // Skip modelselect for non-OpenRouter providers
+      } else if (nextStep === 'modelselect' && !isOpenRouter) {
         setStep('preferences');
       } else {
-        setStep(STEPS[idx + 1]);
+        setStep(nextStep);
       }
     }
-  }, [step, selectedCard]);
+  }, [step, selectedCard, isOpenRouter]);
 
   const goBack = useCallback(() => {
     const idx = STEPS.indexOf(step);
     if (idx > 0) {
-      // If going back from preferences and provider doesn't need key, skip apikey
-      if (STEPS[idx - 1] === 'apikey' && selectedCard && !selectedCard.requiresKey) {
+      const prevStep = STEPS[idx - 1];
+      // Skip modelselect + apikey for providers that don't need key
+      if (prevStep === 'modelselect' && selectedCard && !selectedCard.requiresKey) {
+        setStep('provider');
+      // Skip modelselect when going back for non-OpenRouter
+      } else if (prevStep === 'modelselect' && !isOpenRouter) {
+        setStep('apikey');
+      // Skip apikey for providers that don't need key
+      } else if (prevStep === 'apikey' && selectedCard && !selectedCard.requiresKey) {
         setStep('provider');
       } else {
-        setStep(STEPS[idx - 1]);
+        setStep(prevStep);
       }
     }
-  }, [step, selectedCard]);
+  }, [step, selectedCard, isOpenRouter]);
 
   const handleProviderSelect = useCallback((providerId: string) => {
     setSelectedProviderId(providerId);
@@ -166,15 +187,40 @@ const ConfigWizard: React.FC = () => {
     }
   }, [apiKey, selectedProviderId, registry]);
 
+  // Auto-fetch models when entering the modelselect step
+  useEffect(() => {
+    if (step === 'modelselect' && isOpenRouter && freeModels.length === 0 && paidModels.length === 0 && !modelsLoading) {
+      handleFetchModels();
+    }
+  }, [step]);
+
+  const handleFetchModels = useCallback(async () => {
+    setModelsLoading(true);
+    setModelsError('');
+    try {
+      const result = await OpenRouterProvider.fetchAvailableModels(apiKey.trim());
+      setFreeModels(result.free);
+      setPaidModels(result.paid);
+      setSelectedModel('auto');
+      setModelTier('free');
+    } catch (err) {
+      setModelsError('Failed to fetch models. Please try again.');
+      console.error('Model fetch error:', err);
+    } finally {
+      setModelsLoading(false);
+    }
+  }, [apiKey]);
+
   const handleFinish = useCallback(async () => {
-    setProvider(selectedProviderId);
+    const model = isOpenRouter ? selectedModel : '';
+    setProvider(selectedProviderId, model || undefined);
     setLanguage(selectedLanguage);
     setTheme(selectedTheme);
     if (apiKey) {
       await setApiKey(apiKey, DEVICE_PASSPHRASE);
     }
     markConfigured();
-  }, [selectedProviderId, selectedLanguage, selectedTheme, apiKey, setProvider, setApiKey, setLanguage, setTheme, markConfigured]);
+  }, [selectedProviderId, selectedLanguage, selectedTheme, apiKey, selectedModel, isOpenRouter, setProvider, setApiKey, setLanguage, setTheme, markConfigured]);
 
   if (isConfigured) {
     return null;
@@ -307,6 +353,108 @@ const ConfigWizard: React.FC = () => {
                 }}
                 onClick={goNext}
                 disabled={!keyValid}
+                data-testid="wizard-next"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step: Model Selection (OpenRouter only) */}
+        {step === 'modelselect' && (
+          <div style={styles.stepContent}>
+            <h2 style={styles.title}>Choose Your Models</h2>
+            <p style={styles.description}>
+              Select whether to use free or paid models.
+            </p>
+
+            {modelsLoading && (
+              <p style={{ textAlign: 'center', color: 'var(--secondary-text-color)' }}>
+                Loading available models...
+              </p>
+            )}
+
+            {modelsError && (
+              <div style={{ textAlign: 'center' }}>
+                <span style={styles.errorText}>{modelsError}</span>
+                <button style={{ ...styles.secondaryButton, marginTop: '0.5rem' }} onClick={handleFetchModels}>
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {!modelsLoading && !modelsError && freeModels.length === 0 && paidModels.length === 0 && (
+              <button style={styles.primaryButton} onClick={handleFetchModels}>
+                Load Models
+              </button>
+            )}
+
+            {!modelsLoading && (freeModels.length > 0 || paidModels.length > 0) && (
+              <>
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                  <button
+                    style={{
+                      ...styles.secondaryButton,
+                      backgroundColor: modelTier === 'free' ? 'var(--accent-color)' : 'transparent',
+                      color: modelTier === 'free' ? '#fff' : 'var(--text-color)',
+                    }}
+                    onClick={() => { setModelTier('free'); setSelectedModel('auto'); }}
+                  >
+                    Free Models ({freeModels.length})
+                  </button>
+                  <button
+                    style={{
+                      ...styles.secondaryButton,
+                      backgroundColor: modelTier === 'paid' ? 'var(--accent-color)' : 'transparent',
+                      color: modelTier === 'paid' ? '#fff' : 'var(--text-color)',
+                    }}
+                    onClick={() => { setModelTier('paid'); setSelectedModel(paidModels[0]?.id ?? ''); }}
+                  >
+                    Paid Models ({paidModels.length})
+                  </button>
+                </div>
+
+                <div style={styles.prefGroup}>
+                  <label style={styles.prefLabel}>
+                    {modelTier === 'free' ? 'Free Model' : 'Paid Model'}
+                  </label>
+                  <select
+                    style={styles.select}
+                    value={selectedModel}
+                    onChange={(e) => setSelectedModel(e.target.value)}
+                  >
+                    {modelTier === 'free' && (
+                      <option value="auto">Auto (rotate through all free models)</option>
+                    )}
+                    {(modelTier === 'free' ? freeModels : paidModels).map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {modelTier === 'free' && selectedModel === 'auto' && (
+                  <p style={{ fontSize: '0.8rem', color: 'var(--secondary-text-color)', margin: 0, textAlign: 'center' }}>
+                    Auto mode rotates through free models. If one is rate-limited, you'll be asked to switch.
+                  </p>
+                )}
+              </>
+            )}
+
+            <div style={styles.actions}>
+              <button style={styles.secondaryButton} onClick={goBack} data-testid="wizard-back">
+                Back
+              </button>
+              <button
+                style={{
+                  ...styles.primaryButton,
+                  opacity: (freeModels.length > 0 || paidModels.length > 0) ? 1 : 0.5,
+                  cursor: (freeModels.length > 0 || paidModels.length > 0) ? 'pointer' : 'not-allowed',
+                }}
+                onClick={goNext}
+                disabled={freeModels.length === 0 && paidModels.length === 0}
                 data-testid="wizard-next"
               >
                 Next

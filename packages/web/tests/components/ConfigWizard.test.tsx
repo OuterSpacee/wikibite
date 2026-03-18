@@ -295,13 +295,13 @@ describe('ConfigWizard', () => {
     });
   });
 
-  it('navigates back from preferences to provider (skipping key) for Ollama', () => {
+  it('navigates back from preferences to provider (skipping key and modelselect) for Ollama', () => {
     renderWizard();
     fireEvent.click(screen.getByTestId('wizard-next'));
     fireEvent.click(screen.getByTestId('provider-card-ollama'));
-    fireEvent.click(screen.getByTestId('wizard-next')); // -> preferences (skipped key)
+    fireEvent.click(screen.getByTestId('wizard-next')); // -> preferences (skipped key + modelselect)
     expect(screen.getByText('Preferences')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('wizard-back')); // -> provider (skipped key)
+    fireEvent.click(screen.getByTestId('wizard-back')); // -> provider (skipped key + modelselect)
     expect(screen.getByText('Choose Your AI Provider')).toBeInTheDocument();
   });
 
