@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router';
 import { streamDefinition, generateAsciiArt, getWikiMetadata } from '../services/ai';
 import type { AsciiArtData, WikiMetadata } from '../services/providers/types';
+import { useConfig } from '../contexts/ConfigContext';
 import ContentDisplay from '../components/ContentDisplay';
 import SearchBar from '../components/SearchBar';
 import LoadingSkeleton from '../components/LoadingSkeleton';
@@ -40,6 +41,7 @@ const WikiPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToHistory } = useHistory();
   const { language } = useLanguage();
+  const { config: _config } = useConfig();
 
   // Decode the topic from the URL
   const topic = rawTopic ? decodeURIComponent(rawTopic) : '';
@@ -53,6 +55,7 @@ const WikiPage: React.FC = () => {
   const [metadata, setMetadata] = useState<WikiMetadata | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryTrigger, setRetryTrigger] = useState(0);
   const [asciiArt, setAsciiArt] = useState<AsciiArtData | null>(null);
   const [generationTime, setGenerationTime] = useState<number | null>(null);
 
@@ -132,7 +135,7 @@ const WikiPage: React.FC = () => {
     return () => {
       isCancelled = true;
     };
-  }, [topic, effectiveLanguageName]);
+  }, [topic, effectiveLanguageName, retryTrigger]);
 
   const handleWordClick = useCallback((word: string) => {
     const newTopic = word.trim();
@@ -177,9 +180,79 @@ const WikiPage: React.FC = () => {
       <main>
         <div>
           {error && (
-            <div style={{ border: '1px solid #cc0000', padding: '1rem', color: '#cc0000' }}>
-              <p style={{ margin: 0 }}>An Error Occurred</p>
-              <p style={{ marginTop: '0.5rem', margin: 0 }}>{error}</p>
+            <div style={{
+              border: `1px solid ${error.includes('429') ? 'var(--accent-color)' : 'var(--error-color)'}`,
+              padding: '1.25rem',
+              borderRadius: '8px',
+              color: 'var(--text-color)',
+              textAlign: 'center',
+            }}>
+              {error.includes('429') ? (
+                <>
+                  <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>Model is rate-limited</p>
+                  <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--secondary-text-color)' }}>
+                    The current model is busy. Wait a moment and try again, or switch models in Settings.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                    <button
+                      onClick={() => {
+                        setError(null);
+                        setRetryTrigger((n) => n + 1);
+                      }}
+                      style={{
+                        padding: '0.5rem 1.25rem',
+                        border: 'none',
+                        borderRadius: '4px',
+                        backgroundColor: 'var(--accent-color)',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      Retry
+                    </button>
+                    <button
+                      onClick={() => navigate('/settings')}
+                      style={{
+                        padding: '0.5rem 1.25rem',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '4px',
+                        backgroundColor: 'transparent',
+                        color: 'var(--text-color)',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      Change Model
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p style={{ margin: '0 0 0.5rem', fontWeight: 600 }}>An Error Occurred</p>
+                  <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--secondary-text-color)' }}>{error}</p>
+                  <button
+                    onClick={() => {
+                      setError(null);
+                      setRetryTrigger((n) => n + 1);
+                    }}
+                    style={{
+                      padding: '0.5rem 1.25rem',
+                      border: 'none',
+                      borderRadius: '4px',
+                      backgroundColor: 'var(--accent-color)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    Retry
+                  </button>
+                </>
+              )}
             </div>
           )}
 
